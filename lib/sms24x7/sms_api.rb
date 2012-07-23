@@ -59,7 +59,7 @@ module SmsApi
 
   # Public: Sends a message via sms24x7 API, combining authenticating and sending message in one request.
   #
-  # email, passwrod - Login info
+  # email, password - Login info
   # phone - Recipient phone number in international format (like 7xxxyyyzzzz)
   # text - Message text, ASCII or UTF-8.
   # params - Additional parameters as key => value array, see API doc.
