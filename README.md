@@ -1,3 +1,5 @@
+[![Gem Version](https://badge.fury.io/rb/sms24x7.png)](http://badge.fury.io/rb/sms24x7)
+
 # Sms24x7
 
 Sending SMS via sms24x7 API. For more details see http://sms24x7.ru/api/
