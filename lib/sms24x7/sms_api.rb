@@ -1,5 +1,5 @@
 require 'curb-fu'
-require 'json/pure'
+require 'json'
 require 'active_support/core_ext/module/attribute_accessors'
 
 module SmsApi
