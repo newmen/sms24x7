@@ -27,7 +27,6 @@ SmsApi.setup do |config|
   config.email = 'your@email.com'
   config.password = 'your_password'
 end
-
 ```
 
 There are two ways for sending your SMS.
