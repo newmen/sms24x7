@@ -1,6 +1,6 @@
 require 'curb-fu'
 require 'json/pure'
-require 'active_support/dependencies'
+require 'active_support/core_ext/module/attribute_accessors'
 
 module SmsApi
   SMS_HOST = 'api.sms24x7.ru'
@@ -155,7 +155,6 @@ module SmsApi
     unless (n_raw_sms = data['n_raw_sms']) && (credits = data['credits'])
       raise InterfaceError, "Could not find 'n_raw_sms' or 'credits' in successful push_msg response"
     end
-    #{ :n_raw_sms => n_raw_sms.to_i, :credits => credits.to_f }
     data
   end
 end
