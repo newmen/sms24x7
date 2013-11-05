@@ -3,6 +3,6 @@ require 'sms24x7'
 require 'rspec'
 
 SmsApi.setup do |config|
-  config.email = 'your@email.com'
-  config.password = 'your_password'
+  config.email = ''      # <- enter your email here
+  config.password = ''   # <- enter your password here
 end
