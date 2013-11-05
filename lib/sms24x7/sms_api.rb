@@ -1,5 +1,6 @@
 require 'curb-fu'
 require 'json/pure'
+require 'active_support/dependencies'
 
 module SmsApi
   SMS_HOST = 'api.sms24x7.ru'
@@ -14,7 +15,18 @@ module SmsApi
   class NoGateError < BaseError; end
   class OtherError < BaseError; end
 
+  # Login info
+  mattr_accessor :email
+  mattr_accessor :password
+
+  # Session cookie
+  mattr_reader :cookie
+
   module_function
+
+  def setup
+    yield self
+  end
 
   # Public: Sends request to API
   #
@@ -59,7 +71,6 @@ module SmsApi
 
   # Public: Sends a message via sms24x7 API, combining authenticating and sending message in one request.
   #
-  # email, password - Login info
   # phone - Recipient phone number in international format (like 7xxxyyyzzzz)
   # text - Message text, ASCII or UTF-8.
   # params - Additional parameters as key => value array, see API doc.
@@ -70,11 +81,11 @@ module SmsApi
   #   :credits => credits - Price for a single part
   # }
   #
-  def push_msg_nologin(email, password, phone, text, params = {})
+  def push_msg_nologin(phone, text, params = {})
     request = {
         :method => 'push_msg',
-        :email => email,
-        :password => password,
+        :email => @@email,
+        :password => @@password,
         :phone => phone,
         :text => text
     }.merge(params)
@@ -84,27 +95,30 @@ module SmsApi
 
   # Public: Logs in API, producing a session ID to be sent back in session cookie.
   #
-  # email - User's email
-  # password - User's password
-  #
   # Returns:
-  # cookie - Is a string "sid=#{session_id}" to be passed to cURL
+  # cookie - Is a string "sid=#{session_id}" to be passed to cURL if no block given
   #
-  def login(email, password)
+  def login
     request = {
         :method => 'login',
-        :email => email,
-        :password => password
+        :email => @@email,
+        :password => @@password
     }
     responce = _communicate(request)
     raise InterfaceError, "Login request OK, but no 'sid' set" unless (sid = responce[:data]['sid'])
-    @_cookie = "sid=#{CGI::escape(sid)}"
+    @@cookie = "sid=#{CGI::escape(sid)}"
+
+    if block_given?
+      yield
+      @@cookie = nil
+    end
+
+    @@cookie
   end
 
   # Public: Sends message via API, using previously obtained cookie to authenticate.
   # That is, must first call the login method.
   #
-  # cookie - String, returned by smsapi_login, "sid=#{session_id}"
   # phone - Target phone
   # text - Message text, ASCII or UTF-8
   # params - Dictionary of optional parameters, see API documentation of push_msg method
@@ -116,13 +130,13 @@ module SmsApi
   # }
   #
   def push_msg(phone, text, params = {})
-    raise NoLoginError, 'Must first call the login method' unless @_cookie
+    raise NoLoginError, 'Must first call the login method' unless @@cookie
     request = {
         :method => 'push_msg',
         :phone => phone,
         :text => text
     }.merge(params)
-    responce = _communicate(request, @_cookie)
+    responce = _communicate(request, @@cookie)
     check_and_result_push_msg(responce)
   end
 
