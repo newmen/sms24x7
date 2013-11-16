@@ -14,6 +14,7 @@ Gem::Specification.new do |gem|
   gem.name          = "sms24x7"
   gem.require_paths = ["lib"]
   gem.version       = SmsApi::VERSION
+  gem.license       = 'BSD'
 
   gem.add_dependency 'curb-fu'
   gem.add_dependency 'json'

@@ -53,3 +53,6 @@ end
 
 here `recipient_phones_str_arr` - it's array that consist phone numbers as strings in format that represented above.
 
+## License
+
+sms24x7 ruby gem is licensed under the [BSD License](https://github.com/newmen/sms24x7/blob/master/LICENSE).
