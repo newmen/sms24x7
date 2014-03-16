@@ -2,6 +2,9 @@ require File.dirname(__FILE__) + '/spec_helper'
 
 describe SmsApi do
   describe 'Testing sms24x7 api calls' do
+
+    SENDER_NAME = '+79023897339'
+
     def error_message(variable, filename, line_number = nil)
       msg = "Please setup your #{variable} in spec/#{filename}"
       msg << " at line ##{line_number}" if line_number
@@ -16,16 +19,13 @@ describe SmsApi do
       SmsApi.password.should_not eq(''), error_message('password', 'spec_helper.rb')
     end
 
-    it 'sending SMS' do
+    it 'sending single SMS' do
       check_email_and_password
 
       phone = '' # <- enter here your phone number
       phone.should_not eq(''), error_message('phone number', 'functional_spec.rb', __LINE__ - 1)
 
-      sending_result = SmsApi.push_msg_nologin(phone, 'test passed',
-                                               :sender_name => 'RSpec',
-                                               :api => '1.1',
-                                               :satellite_adv => 'IF_EXISTS')
+      sending_result = SmsApi.push_msg_nologin(phone, 'Single SMS RSpec test passed', :sender_name => SENDER_NAME)
 
       sending_result.should have_key('n_raw_sms')
       sending_result.should have_key('credits')
@@ -39,7 +39,7 @@ describe SmsApi do
 
       SmsApi.login do
         phones.each do |phone|
-          sending_result = SmsApi.push_msg_nologin(phone, 'multiple SMS test passed')
+          sending_result = SmsApi.push_msg(phone, 'Multiple SMS RSpec test passed', :sender_name => SENDER_NAME)
           sending_result.should have_key('n_raw_sms')
           sending_result.should have_key('credits')
         end
