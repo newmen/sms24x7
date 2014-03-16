@@ -4,6 +4,7 @@ require 'active_support/core_ext/module/attribute_accessors'
 
 module SmsApi
   SMS_HOST = 'api.sms24x7.ru'
+  API_VERSION = '1.1'
 
   class BaseError < ::StandardError; end
   class AccountBlockedError < BaseError; end
@@ -128,6 +129,7 @@ module SmsApi
   #
   def push_msg_nologin(phone, text, params = {})
     request = {
+        :api => API_VERSION,
         :method => 'push_msg',
         :email => @@email,
         :password => @@password,
@@ -145,6 +147,7 @@ module SmsApi
   #
   def login
     request = {
+        :api => API_VERSION,
         :method => 'login',
         :email => @@email,
         :password => @@password
@@ -177,6 +180,7 @@ module SmsApi
   def push_msg(phone, text, params = {})
     raise NoLoginError, 'Must first call the login method' unless @@cookie
     request = {
+        :api => API_VERSION,
         :method => 'push_msg',
         :phone => phone,
         :text => text
