@@ -5,15 +5,32 @@ require 'active_support/core_ext/module/attribute_accessors'
 module SmsApi
   SMS_HOST = 'api.sms24x7.ru'
 
-  class BaseError < Exception; end
-  class InterfaceError < BaseError; end
+  class BaseError < ::StandardError; end
+  class AccountBlockedError < BaseError; end
+  class AccountNotFoundError < BaseError; end
+  class ActionRejectedError < BaseError; end
+  class ApiVersionError < BaseError; end
+  class ArgumentsError < BaseError; end
   class AuthError < BaseError; end
-  class NoLoginError < BaseError; end
   class BalanceError < BaseError; end
-  class SpamError < BaseError; end
+  class DeliveryError < BaseError; end
+  class DomainBusyError < BaseError; end
   class EncodingError < BaseError; end
+  class InterfaceError < BaseError; end
+  class InternalError < BaseError; end
+  class MessagesNotDeliveryError < BaseError; end
   class NoGateError < BaseError; end
+  class NoLoginError < BaseError; end
   class OtherError < BaseError; end
+  class PasswordError < BaseError; end
+  class SaveError < BaseError; end
+  class SenderNameError < BaseError; end
+  class SessionExpiredError < BaseError; end
+  class SpamError < BaseError; end
+  class TarifNotFoundError < BaseError; end
+  class TimeoutError < BaseError; end
+  class UnauthorizedPartnerError < BaseError; end
+  class UndefinedError < BaseError; end
 
   # Login info
   mattr_accessor :email
@@ -56,13 +73,41 @@ module SmsApi
 
     error_code = error_code.to_i
     if error_code > 0
+      raise_error = -> error, text { raise error, msg['text'] || text }
+
       case error_code
-        when 2 then raise AuthError
-        when 29 then raise NoGateError
-        when 35 then raise EncodingError
-        when 36 then raise BalanceError, 'No money'
-        when 37, 38 then raise SpamError
-        else raise OtherError, "Communication to API failed. Error code: #{error_code}"
+        when 2 then raise_error[AuthError, 'Wrong login or password']
+        when 3 then raise_error[TimeoutError, 'You have been inactive for more than 24 minutes']
+
+        when 4 then raise_error[AccountBlockedError, 'Your account is blocked']
+        when 5 then raise_error[UndefinedError, 'Undefined method']
+        when 6 then raise_error[ApiVersionError, 'Wrong API version']
+        when 7 then raise_error[ArgumentsError, 'Not all necessary parameters are set']
+        when 10 then raise_error[UnauthorizedPartnerError, 'Partner is not authorized']
+        when 11 then raise_error[SaveError, 'Error saving']
+        when 15 then raise_error[ActionRejectedError, 'Action rejected']
+        when 16 then raise_error[PasswordError, 'Wrong password']
+        when 18 then raise_error[SessionExpiredError, 'Session expired']
+        when 19 then raise_error[InternalError, 'Internal operator error']
+
+        when 22 then raise_error[AccountNotFoundError, 'Account is not found']
+
+        when 29 then raise_error[NoGateError, 'Mobile operator gateway is not connected']
+        when 35 then raise_error[EncodingError, 'Wrong encoding']
+        when 36 then raise_error[BalanceError, 'Not enough money']
+        when 37, 38, 59 then raise_error[SpamError, 'Spam detected']
+
+        when 39 then raise_error[SenderNameError, 'Invalid sender name']
+        when 40 then raise_error[DeliveryError, 'Undeliverable']
+        when 42 then raise_error[NoLoginError, 'Login to continue']
+
+        when 43 then raise_error[DomainBusyError, 'Domain busy']
+        when 45 then raise_error[BaseError, 'Basic settings is not found']
+        when 44, 47 then raise_error[TarifNotFoundError, 'Tarif is not found']
+
+        when 58 then raise_error[MessagesNotDeliveryError, 'Messages are not delivered']
+
+        else raise_error[OtherError, "Communication to API failed. Error code: #{error_code}"]
       end
     end
 
